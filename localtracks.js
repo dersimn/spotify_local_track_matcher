@@ -6,7 +6,7 @@ $(function() {
     $('#auth').attr('href', 'https://accounts.spotify.com/authorize?'+$.param({
         client_id: '74af9cd024304ad28d4e4ea53b0fd5da',
         response_type: 'token',
-        redirect_uri: 'http://localhost/auth.htm',
+        redirect_uri: window.location.origin + window.location.pathname,
         scope: 'playlist-read-private playlist-modify-public playlist-modify-private playlist-read-collaborative'
     }));
 
