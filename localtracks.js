@@ -2,6 +2,8 @@ var spotifyApi = new SpotifyWebApi();
 var spotifyToken;
 var spotifyUserId;
 
+var userPlaylists = {};
+
 $(function() {
     $('#auth').attr('href', 'https://accounts.spotify.com/authorize?'+$.param({
         client_id: '74af9cd024304ad28d4e4ea53b0fd5da',
@@ -11,7 +13,6 @@ $(function() {
     }));
 
     spotifyToken = $.deparam(window.location.hash.replace(/^#/, ''));
-    console.log(spotifyToken);
 
     if ('access_token' in spotifyToken) {
         spotifyApi.setAccessToken(spotifyToken['access_token']);
@@ -29,19 +30,13 @@ $(function() {
             }
 
             spotifyApi.getUserPlaylists({
-                limit: 10
+                limit: 50
             }).then(firstResponse => {
                 function processResponse(response) {
                     response.items.forEach(playlist => {
                         if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
-                            $('#playlists > tbody').append(
-                                $('<tr>').attr('id', 'playlist-'+playlist.id).append(
-                                    $('<th scope="row">').text(playlist.name),
-                                    $('<td>').text(playlist.owner.display_name || playlist.owner.id),
-                                    $('<td>').text(playlist.tracks.total),
-                                    $('<td class="local">')
-                                )
-                            );
+                            userPlaylists[playlist.id] = playlist;
+                            userPlaylists[playlist.id]['localtracks'] = [];
 
                             spotifyApi.getPlaylistTracks(playlist.id).then(firstResponse => {
                                 function getLocalTracks(res) {
@@ -49,14 +44,7 @@ $(function() {
                                     
                                     res.items.forEach(item => {
                                         if (/^spotify:local/.test(item.track.uri)) {
-                                            var element = $('tr[id="playlist-'+playlistId+'"] > td.local');
-                                            var currentText = $(element).text();
-
-                                            if (currentText) {
-                                                $(element).text(Number(currentText) + 1);
-                                            } else {
-                                                $(element).text('1');
-                                            }
+                                            userPlaylists[playlistId]['localtracks'].push(item.track);
                                         }
                                     });
                                 }
