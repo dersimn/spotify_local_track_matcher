@@ -23,29 +23,33 @@ $(async function() {
     } else {
         $('#step1').addClass('list-group-item-success');
         $('#step1 button').prop('disabled', true);
-        $('#step2 button').prop('disabled', false);
     
         // Step 2
         spotify.setAccessToken(spotifyToken['access_token']);
 
-        $('#step2 button').prop('disabled', true);
-
+        $('#step2').addClass('working');
         try {
             var profile = await spotify.getMe();
             var spotifyUserId = profile.id;
 
             await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
                 var ownPlaylists = res.items.filter(playlist => (playlist.owner.id == spotifyUserId || playlist.collaborative));
+
                 userPlaylists = userPlaylists.concat(ownPlaylists);
+                $('#step2 small').text('found '+userPlaylists.length+' playlists');
             });
 
+            $('#step2').removeClass('working');
             $('#step2').addClass('list-group-item-success');
         } catch {
+            $('#step2').removeClass('working');
             $('#step2').addClass('list-group-item-danger');
             return;
         }
         
         // Step 3
+        $('#step3').addClass('working');
+        var localtrackCount = 0;
         userPlaylists.forEach(playlist => {
             if (typeof playlist['localtracks'] === 'undefined') {
                 playlist['localtracks'] = [];
@@ -58,18 +62,26 @@ $(async function() {
 
                     if (trackItem.is_local) {
                         playlist['localtracks'].push(trackItem);
+
+                        localtrackCount++;
+                        $('#step3 small').text('found '+localtrackCount+' local tracks');
                     }
                 });
             }).catch(() => {
+                $('#step3').removeClass('working');
                 $('#step3').addClass('list-group-item-danger');
                 queue.pause();
             }));
         });
 
         await queue.onEmpty();
+        $('#step3').removeClass('working');
         $('#step3').addClass('list-group-item-success');
 
+
+
         // Step 4
+        $('#step4').addClass('working');
         userPlaylists.forEach(playlist => {
             playlist.localtracks.forEach(localtrack => {
                 if (typeof localtrack['matches'] === 'undefined') {
@@ -81,12 +93,14 @@ $(async function() {
                         localtrack['matches'] = localtrack['matches'].concat(res.tracks.items);
                     }
                 ).catch(() => {
+                    $('#step4').removeClass('working');
                     $('#step4').addClass('list-group-item-danger');
                     queue.pause();
                 }));
             });
         });
         await queue.onEmpty();
+        $('#step4').removeClass('working');
         $('#step4').addClass('list-group-item-success');
 
         // Development

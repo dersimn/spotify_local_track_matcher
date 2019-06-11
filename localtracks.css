@@ -45,3 +45,23 @@ code {
 .playlist, .localtrack {
   border-right:   1px dashed #000;
 }
+
+/* Animation during processing */
+.working {
+  background-color: #fff;
+  animation-name: color;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes color {
+  0% {
+    background-color: #fff;
+  }
+  50% {
+    background-color: rgb(77, 173, 255);
+  }
+  100% {
+    background-color: #fff;
+  }
+}
