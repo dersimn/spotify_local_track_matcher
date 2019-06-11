@@ -1,5 +1,5 @@
 const spotify = new SpotifyWebApi();
-const queue = new PQueue({concurrency: 1});
+const queue = new PQueue({concurrency: 10});
 
 var spotifyToken;
 var spotifyUserId;
@@ -84,13 +84,7 @@ $(function() {
                 //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
 
                 queue.add(() => spotifyProcessNext(
-                    spotify.search(
-                        localtrack.track.name+' artist:'+localtrack.track.artists[0].name,
-                        ['track'],
-                        {
-                            limit: 5
-                        }
-                    ),
+                    spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
                     (res) => {
                         playlist.localtrackMatches[trackPosition] = res.tracks.items;
                     }
