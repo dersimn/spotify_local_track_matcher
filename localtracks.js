@@ -57,50 +57,51 @@ $(function() {
         }
         
         // Step 3
-        try {
-            Object.keys(userPlaylists).forEach(playlistId => {
-                queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
-                    res.items.forEach((trackItem, position) => {
-                        userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
+        Object.keys(userPlaylists).forEach(playlistId => {
+            queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
+                res.items.forEach((trackItem, position) => {
+                    userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
 
-                        if (trackItem.is_local) {
-                            userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
-                        }
-                    });
-                }));
-            });
+                    if (trackItem.is_local) {
+                        userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
+                    }
+                });
+            }).catch(() => {
+                $('#step3').addClass('list-group-item-danger');
+                queue.pause();
+            }));
+        });
 
-            await queue.onEmpty();
-            $('#step3').addClass('list-group-item-success');
-        } catch {
-            $('#step3').addClass('list-group-item-danger');
-            return;
-        }
+        await queue.onEmpty();
+        $('#step3').addClass('list-group-item-success');
 
         // Step 4
-        try {
-            Object.keys(userPlaylists).forEach(playlistId => {
-                var playlist = userPlaylists[playlistId];
-                Object.keys(playlist.localtracks).forEach(trackPosition => {
-                    var localtrack = playlist.localtracks[trackPosition];
+        Object.keys(userPlaylists).forEach(playlistId => {
+            var playlist = userPlaylists[playlistId];
+            Object.keys(playlist.localtracks).forEach(trackPosition => {
+                var localtrack = playlist.localtracks[trackPosition];
 
-                    //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
+                //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
 
-                    queue.add(() => spotifyProcessNext(
-                        spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
-                        (res) => {
-                            playlist.localtrackMatches[trackPosition] = res.tracks.items;
+                queue.add(() => spotifyProcessNext(
+                    spotify.search(
+                        localtrack.track.name+' artist:'+localtrack.track.artists[0].name,
+                        ['track'],
+                        {
+                            limit: 5
                         }
-                    ));
-                });
+                    ),
+                    (res) => {
+                        playlist.localtrackMatches[trackPosition] = res.tracks.items;
+                    }
+                ).catch(() => {
+                    $('#step4').addClass('list-group-item-danger');
+                    queue.pause();
+                }));
             });
-
-            await queue.onEmpty();
-            $('#step4').addClass('list-group-item-success');
-        } catch {
-            $('#step4').addClass('list-group-item-danger');
-            return;
-        }
+        });
+        await queue.onEmpty();
+        $('#step4').addClass('list-group-item-success');
     });
 });
 
