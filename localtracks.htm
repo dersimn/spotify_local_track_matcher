@@ -68,29 +68,7 @@
         </div>
       </div>
       <div class="row">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th scope="col">Playlist</th>
-              <th scope="col">Local Tracks</th>
-              <th scope="col">Matches</th>
-            </tr>
-          </thead>
-          <tbody id="maintable">
-            <tr>
-              <td rowspan="3">Playlist 1</td>
-              <td rowspan="2">local 1</td>
-              <td>track match1</td>
-            </tr>
-            <tr>
-              <td>track match2</td>
-            </tr>
-            <tr>
-              <td>local 2</td>
-              <td>track match2</td>
-            </tr>
-          </tbody>
-        </table>
+        <div id="tableContainer" class="col-12"></div>
       </div>
     </div>
 
@@ -100,11 +78,33 @@
       </div>
     </footer>
 
+    <script id="tableTemplate" type="text/template">
+      {{#playlists}}
+        <div class="row">
+          <div class="col-4 playlist">{{name}}</div>
+          <div class="col-8">
+            {{#localtracks}}
+              <div class="row">
+                <div class="col-6 localtrack">{{name}}</div>
+                <div class="col-6">
+                  {{#matches}}
+                    <div class="row">
+                      <div class="col-12 match">{{name}}</div>
+                    </div>
+                  {{/matches}}
+                </div>
+              </div>
+            {{/localtracks}}
+          </div>
+        </div>
+      {{/playlists}}
+    </script>
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/jquery-deparam/jquery-deparam.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script src="node_modules/spotify-web-api-js/src/spotify-web-api.js"></script>
     <script src="p-queue.js"></script>
+    <script src="node_modules/mustache/mustache.js"></script>
     <script src="localtracks.js"></script>
   </body>
 </html>

@@ -35,3 +35,13 @@ body > .container {
 code {
   font-size: 80%;
 }
+
+#tableContainer {
+  margin-top: 50px;
+}
+.playlist, .localtrack, .match {
+  border-bottom: 1px solid  #000;
+}
+.playlist, .localtrack {
+  border-right:   1px dashed #000;
+}
