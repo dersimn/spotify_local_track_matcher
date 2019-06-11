@@ -1,10 +1,10 @@
 const spotify = new SpotifyWebApi();
-const queue = new PQueue({concurrency: 10});
+const queue = new PQueue({concurrency: 1});
 
 var spotifyToken;
 var spotifyUserId;
 
-var userPlaylists = {};
+var userPlaylists = [];
 
 $(function() {
     spotifyToken = $.deparam(window.location.hash.replace(/^#/, ''));
@@ -40,13 +40,8 @@ $(function() {
             var spotifyUserId = profile.id;
 
             await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
-                res.items.forEach(playlist => {
-                    if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
-                        userPlaylists[playlist.id] = playlist;
-                        userPlaylists[playlist.id]['localtracks'] = {};
-                        userPlaylists[playlist.id]['localtrackMatches'] = {};
-                    }
-                });
+                var ownPlaylists = res.items.filter(playlist => (playlist.owner.id == spotifyUserId || playlist.collaborative));
+                userPlaylists = userPlaylists.concat(ownPlaylists);
             });
 
             $('#step2').addClass('list-group-item-success');
@@ -56,13 +51,18 @@ $(function() {
         }
         
         // Step 3
-        Object.keys(userPlaylists).forEach(playlistId => {
-            queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
+        userPlaylists.forEach(playlist => {
+            if (typeof playlist['localtracks'] === 'undefined') {
+                playlist['localtracks'] = [];
+            }
+            queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlist.id), (res) => {
                 res.items.forEach((trackItem, position) => {
-                    userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
+                    trackItem['position'] = res.offset+position;
+
+                    playlist['tracks'][res.offset+position] = trackItem;
 
                     if (trackItem.is_local) {
-                        userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
+                        playlist['localtracks'].push(trackItem);
                     }
                 });
             }).catch(() => {
@@ -75,17 +75,15 @@ $(function() {
         $('#step3').addClass('list-group-item-success');
 
         // Step 4
-        Object.keys(userPlaylists).forEach(playlistId => {
-            var playlist = userPlaylists[playlistId];
-            Object.keys(playlist.localtracks).forEach(trackPosition => {
-                var localtrack = playlist.localtracks[trackPosition];
-
-                //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
-
+        userPlaylists.forEach(playlist => {
+            playlist.localtracks.forEach(localtrack => {
+                if (typeof localtrack['matches'] === 'undefined') {
+                    localtrack['matches'] = [];
+                }
                 queue.add(() => spotifyProcessNext(
-                    spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
+                    spotify.searchTracks(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, {limit: 5}),
                     (res) => {
-                        playlist.localtrackMatches[trackPosition] = res.tracks.items;
+                        localtrack['matches'] = localtrack['matches'].concat(res.tracks.items);
                     }
                 ).catch(() => {
                     $('#step4').addClass('list-group-item-danger');
@@ -95,6 +93,17 @@ $(function() {
         });
         await queue.onEmpty();
         $('#step4').addClass('list-group-item-success');
+
+        // Development
+        // downloadJson(userPlaylists, 'userPlaylists.json');
+        // $.getJSON('userPlaylists.json', function(data) {
+        //     userPlaylists = data;
+        // });
+
+        // Step 5
+        // var template = $('#tableTemplate').html();
+        // var rendered = Mustache.render(template, {playlists: userPlaylists});
+        // $('#tableContainer').append(rendered);
     });
 });
 
@@ -120,4 +129,12 @@ function spotifyProcessNext(initialPromise, processFunction) {
         }
         _internalRecursive(initialPromise, processFunction, resolve, reject);
     }); 
+}
+
+function downloadJson(content, fileName, contentType = 'application/json') {
+    var a = document.createElement("a");
+    var file = new Blob([JSON.stringify(content, null, 4)], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
 }
