@@ -116,16 +116,11 @@ $(async function() {
 
             playlist.localtracks.forEach(localtrack => {
                 localtrack.matches.forEach(match => {
+                    match.chosenOne = false;
                     match.duration_difference = match.duration_ms - localtrack.track.duration_ms;
                 });
             });
         });
-
-        // Development
-        // downloadJson(userPlaylists, 'userPlaylists.json');
-        // $.getJSON('userPlaylists.json', function(data) {
-        //     userPlaylists = data;
-        // });
 
         // Render Table
         var template = $('#tableTemplate').html();
@@ -135,6 +130,21 @@ $(async function() {
         // Enable Step 5
         $('#step5 button').prop('disabled', false);
     }
+
+    // Step 5
+    $('#step5 button').click(async function() {
+        userPlaylists.forEach(playlist => {
+            playlist.localtracks.forEach(localtrack => {
+                if (Math.abs(localtrack.matches[0].duration_difference) < 5000) {
+                    localtrack.matches[0].chosenOne = true;
+                }
+
+                localtrack.matches.forEach(match => {
+                    // ...
+                });
+            });
+        });
+    });
 });
 
 function spotifyProcessNext(initialPromise, processFunction) {
@@ -159,12 +169,4 @@ function spotifyProcessNext(initialPromise, processFunction) {
         }
         _internalRecursive(initialPromise, processFunction, resolve, reject);
     }); 
-}
-
-function downloadJson(content, fileName, contentType = 'application/json') {
-    var a = document.createElement("a");
-    var file = new Blob([JSON.stringify(content, null, 4)], {type: contentType});
-    a.href = URL.createObjectURL(file);
-    a.download = fileName;
-    a.click();
 }
