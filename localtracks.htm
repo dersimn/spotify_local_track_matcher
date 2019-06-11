@@ -44,7 +44,7 @@
                 <h5 class="mb-1">Authorize</h5>
               </div>
               <p class="mb-1">First you need to authorize this website with your Spotify account.</p>
-              <p class="mb-1">Click the <button type="button" class="btn btn-primary btn-sm">Authorize</button> button to start.</p>
+              <p class="mb-1"><button type="button" class="btn btn-primary btn-sm">Authorize</button></p>
             </div>
             <div id="step2" class="list-group-item">
               <div class="d-flex w-100 justify-content-between">
@@ -67,6 +67,22 @@
               </div>
               <p class="mb-1">Try to find songs on Spotify that could match your local files.</p>
             </div>
+            <div id="step5" class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Auto-match search results</h5>
+                <small></small>
+              </div>
+              <p class="mb-1">Use the following settings to auto-macht your search results. Manually click in the table below to set matching songs yourself.</p>
+              <p class="mb-1"><button type="button" class="btn btn-primary btn-sm" disabled>Auto-match</button></p>
+            </div>
+            <div id="step6" class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Save matches to Spotify</h5>
+                <small></small>
+              </div>
+              <p class="mb-1">Destructively write the matches found here to your (online) Spotify playlists. This removes / deletes the previous local tracks from your playlists.</p>
+              <p class="mb-1"><button type="button" class="btn btn-primary btn-sm" disabled>Save</button></p>
+            </div>
           </div>
         </div>
       </div>
@@ -82,28 +98,32 @@
     </footer>
 
     <script id="tableTemplate" type="text/template">
+      <div class="row headline">
+        <div class="col-4"><p class="font-weight-bold">Playlist Name</p></div>
+        <div class="col-4"><p class="font-weight-bold">Local Track</p></div>
+        <div class="col-4"><p class="font-weight-bold">Matches</p></div>
+      </div>
       {{#playlists}}
         <div class="row">
           <div class="col-4 playlist">
-            <p class="font-weight-bold">{{name}}</p>
+            <p class="font-weight-normal">{{name}}</p>
           </div>
           <div class="col-8">
             {{#localtracks}}
               <div class="row">
                 <div class="col-6 localtrack">
-                  <p class="font-weight-bold">{{track.name}}</p>
+                  <p class="font-weight-normal">{{track.name}}</p>
                   <p class="font-weight-light">{{#track.artists}}{{name}}, {{/track.artists}}</p>
                   <p class="font-weight-light">{{track.album.name}}</p>
-                  <p class="text-monospace">{{track.duration_ms}} ms</p>
                 </div>
                 <div class="col-6">
                   {{#matches}}
                     <div class="row">
                       <div class="col-12 match">
-                        <p class="font-weight-bold">{{name}}</p>
+                        <p class="font-weight-normal">{{name}}</p>
                         <p class="font-weight-light">{{#artists}}{{name}}, {{/artists}}</p>
                         <p class="font-weight-light">{{album.name}}</p>
-                        <p class="text-monospace">{{duration_ms}} ms</p>
+                        <p class="text-monospace">{{duration_difference}} ms</p>
                       </div>
                     </div>
                   {{/matches}}

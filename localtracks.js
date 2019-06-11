@@ -110,9 +110,15 @@ $(async function() {
         $('#step4').removeClass('working');
         $('#step4').addClass('list-group-item-success');
 
-        // Remove local tracks that don't have matches
         userPlaylists.forEach(playlist => {
+            // Remove local tracks that don't have matches
             playlist.localtracks = playlist.localtracks.filter(localtrack => localtrack.matches.length != 0);
+
+            playlist.localtracks.forEach(localtrack => {
+                localtrack.matches.forEach(match => {
+                    match.duration_difference = match.duration_ms - localtrack.track.duration_ms;
+                });
+            });
         });
 
         // Development
@@ -121,10 +127,13 @@ $(async function() {
         //     userPlaylists = data;
         // });
 
-        // Step 5
+        // Render Table
         var template = $('#tableTemplate').html();
         var rendered = Mustache.render(template, {playlists: userPlaylists});
         $('#tableContainer').append(rendered);
+
+        // Enable Step 5
+        $('#step5 button').prop('disabled', false);
     }
 });
 

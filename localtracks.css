@@ -38,9 +38,19 @@ code {
 
 #tableContainer {
   margin-top: 50px;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
 }
+#tableContainer p {
+  margin: 0;
+}
+
+#tableContainer .headline {
+  border-bottom: 2px solid #000;
+}
+
 .playlist, .localtrack, .match {
-  border-bottom: 1px solid  #000;
+  border-bottom: 1px solid #000;
 }
 .playlist, .localtrack {
   border-right:   1px dashed #000;
