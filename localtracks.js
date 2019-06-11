@@ -6,30 +6,6 @@ var spotifyUserId;
 
 var userPlaylists = {};
 
-function spotifyProcessNext(initialPromise, processFunction) {
-    return new Promise((resolve, reject) => {
-        function _internalRecursive(promise, processFunction, resolve, reject) {
-            promise.then(response => {
-                processFunction(response);
-
-                if (response.next) {
-                    _internalRecursive(
-                        spotify.getGeneric(response.next), 
-                        processFunction, 
-                        resolve, 
-                        reject
-                    );
-                } else {
-                    resolve();
-                }
-            }).catch(err => {
-                reject(err);
-            });
-        }
-        _internalRecursive(initialPromise, processFunction, resolve, reject);
-    }); 
-}
-
 $(function() {
     spotifyToken = $.deparam(window.location.hash.replace(/^#/, ''));
 
@@ -54,77 +30,100 @@ $(function() {
     }
     
     // Step 2
-    $('#step2 button').click(function() {
+    $('#step2 button').click(async function() {
         spotify.setAccessToken(spotifyToken['access_token']);
 
         $('#step2 button').prop('disabled', true);
         
-        spotify.getMe()
-            .then(profile => {spotifyUserId = profile.id})
-            .then(() => {
-                return spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
-                    res.items.forEach(playlist => {
-                        if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
-                            userPlaylists[playlist.id] = playlist;
-                            userPlaylists[playlist.id]['localtracks'] = {};
-                            userPlaylists[playlist.id]['localtrackMatches'] = {};
+        var profile = await spotify.getMe();
+        var spotifyUserId = profile.id;
+        console.log(spotifyUserId);
+
+        try {
+            await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
+                res.items.forEach(playlist => {
+                    if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
+                        userPlaylists[playlist.id] = playlist;
+                        userPlaylists[playlist.id]['localtracks'] = {};
+                        userPlaylists[playlist.id]['localtrackMatches'] = {};
+                    }
+                });
+            });
+
+            $('#step2').addClass('list-group-item-success');
+        } catch {
+            $('#step2').addClass('list-group-item-danger');
+            return;
+        }
+        
+        // Step 3
+        try {
+            Object.keys(userPlaylists).forEach(playlistId => {
+                queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
+                    res.items.forEach((trackItem, position) => {
+                        userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
+
+                        if (trackItem.is_local) {
+                            userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
                         }
                     });
-                });
-            })
-            .then(() => {
-                $('#step2').addClass('list-group-item-success');
-            }, (err) => {
-                $('#step2').addClass('list-group-item-danger');
-            })
-            // Step 3
-            .then(() => {
-                var track_promises = [];
-                Object.keys(userPlaylists).forEach(playlistId => {
-                    track_promises.push(spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
-                        res.items.forEach((trackItem, position) => {
-                            userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
+                }));
+            });
 
-                            if (trackItem.is_local) {
-                                userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
-                            }
-                        });
-                    }));
-                });
-                return Promise.all(track_promises);
-            })
-            .then(() => {
-                $('#step3').addClass('list-group-item-success');
-            }, (err) => {
-                $('#step3').addClass('list-group-item-danger');
-            })
-            // Step 4
-            .then(() => {
-                var search_promises = [];
-                Object.keys(userPlaylists).forEach(playlistId => {
-                    var playlist = userPlaylists[playlistId];
-                    Object.keys(playlist.localtracks).forEach(trackPosition => {
-                        var localtrack = playlist.localtracks[trackPosition];
+            await queue.onEmpty();
+            $('#step3').addClass('list-group-item-success');
+        } catch {
+            $('#step3').addClass('list-group-item-danger');
+            return;
+        }
 
-                        //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
+        // Step 4
+        try {
+            Object.keys(userPlaylists).forEach(playlistId => {
+                var playlist = userPlaylists[playlistId];
+                Object.keys(playlist.localtracks).forEach(trackPosition => {
+                    var localtrack = playlist.localtracks[trackPosition];
 
-                        search_promises.push(spotifyProcessNext(
-                            spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
-                            (res) => {
-                                playlist.localtrackMatches[trackPosition] = res.tracks.items;
-                            }
-                        ));
-                    });
+                    //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
+
+                    queue.add(() => spotifyProcessNext(
+                        spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
+                        (res) => {
+                            playlist.localtrackMatches[trackPosition] = res.tracks.items;
+                        }
+                    ));
                 });
-                return Promise.all(search_promises);
-            })
-            .then(() => {
-                $('#step4').addClass('list-group-item-success');
-            }, (err) => {
-                $('#step4').addClass('list-group-item-danger');
-            })
-            .catch(err => {
-                console.error(err);
-            })
+            });
+
+            await queue.onEmpty();
+            $('#step4').addClass('list-group-item-success');
+        } catch {
+            $('#step4').addClass('list-group-item-danger');
+            return;
+        }
     });
 });
+
+function spotifyProcessNext(initialPromise, processFunction) {
+    return new Promise((resolve, reject) => {
+        function _internalRecursive(promise, processFunction, resolve, reject) {
+            promise.then(response => {
+                processFunction(response);
+
+                if (response.next) {
+                    _internalRecursive(
+                        spotify.getGeneric(response.next), 
+                        processFunction, 
+                        resolve, 
+                        reject
+                    );
+                } else {
+                    resolve();
+                }
+            }).catch(err => {
+                reject(err);
+            });
+        }
+        _internalRecursive(initialPromise, processFunction, resolve, reject);
+    }); 
+}
