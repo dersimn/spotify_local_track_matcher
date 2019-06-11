@@ -60,68 +60,69 @@ $(function() {
         spotify.getMe()
             .then(profile => {spotifyUserId = profile.id})
             .then(() => {
-                return spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (response) => {
-                    response.items.forEach(playlist => {
+                return spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
+                    res.items.forEach(playlist => {
                         if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
                             userPlaylists[playlist.id] = playlist;
-                            userPlaylists[playlist.id]['localtracks'] = [];
+                            userPlaylists[playlist.id]['localtracks'] = {};
+                            userPlaylists[playlist.id]['localtrackMatches'] = {};
                         }
                     });
                 });
             })
             .then(() => {
-                console.log(userPlaylists);
+                $('#step2').addClass('list-group-item-success');
+            }, (err) => {
+                $('#step2').addClass('list-group-item-danger');
+            })
+            // Step 3
+            .then(() => {
+                var track_promises = [];
+                Object.keys(userPlaylists).forEach(playlistId => {
+                    track_promises.push(spotifyProcessNext(spotify.getPlaylistTracks(playlistId), (res) => {
+                        res.items.forEach((trackItem, position) => {
+                            userPlaylists[playlistId]['tracks'][res.offset+position] = trackItem;
+
+                            if (trackItem.is_local) {
+                                userPlaylists[playlistId]['localtracks'][res.offset+position] = trackItem;
+                            }
+                        });
+                    }));
+                });
+                return Promise.all(track_promises);
+            })
+            .then(() => {
+                $('#step3').addClass('list-group-item-success');
+            }, (err) => {
+                $('#step3').addClass('list-group-item-danger');
+            })
+            // Step 4
+            .then(() => {
+                var search_promises = [];
+                Object.keys(userPlaylists).forEach(playlistId => {
+                    var playlist = userPlaylists[playlistId];
+                    Object.keys(playlist.localtracks).forEach(trackPosition => {
+                        var localtrack = playlist.localtracks[trackPosition];
+
+                        //console.log(localtrack.track.name+' artist:'+localtrack.track.artists[0].name);
+
+                        search_promises.push(spotifyProcessNext(
+                            spotify.search(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, ['track']),
+                            (res) => {
+                                playlist.localtrackMatches[trackPosition] = res.tracks.items;
+                            }
+                        ));
+                    });
+                });
+                return Promise.all(search_promises);
+            })
+            .then(() => {
+                $('#step4').addClass('list-group-item-success');
+            }, (err) => {
+                $('#step4').addClass('list-group-item-danger');
             })
             .catch(err => {
                 console.error(err);
             })
     });
-    
-
-    // if ('access_token' in spotifyToken) {
-    //     spotifyApi.setAccessToken(spotifyToken['access_token']);
-
-    //     spotifyApi.getMe().then(profile => {
-    //         spotifyUserId = profile.id;
-
-    //         function itterativeGetResponse(currentRes, callback) {
-    //             if (currentRes.next == null) return;
-
-    //             spotifyApi.getGeneric(currentRes.next).then(nextRes => {
-    //                 callback(nextRes);
-    //                 itterativeGetResponse(nextRes, callback);
-    //             });
-    //         }
-
-    //         spotifyApi.getUserPlaylists({
-    //             limit: 50
-    //         }).then(firstResponse => {
-    //             function processResponse(response) {
-    //                 response.items.forEach(playlist => {
-    //                     if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
-    //                         userPlaylists[playlist.id] = playlist;
-    //                         userPlaylists[playlist.id]['localtracks'] = [];
-
-    //                         spotifyApi.getPlaylistTracks(playlist.id).then(firstResponse => {
-    //                             function getLocalTracks(res) {
-    //                                 var playlistId = res.href.match(/playlists\/([A-Za-z0-9]+)\//)[1];
-                                    
-    //                                 res.items.forEach(item => {
-    //                                     if (/^spotify:local/.test(item.track.uri)) {
-    //                                         userPlaylists[playlistId]['localtracks'].push(item.track);
-    //                                     }
-    //                                 });
-    //                             }
-    //                             getLocalTracks(firstResponse);
-    //                             itterativeGetResponse(firstResponse, getLocalTracks);
-    //                         });
-    //                     }
-    //                 });
-    //             }
-
-    //             processResponse(firstResponse);
-    //             itterativeGetResponse(firstResponse, processResponse);
-    //         });
-    //     });
-    // }
 });
