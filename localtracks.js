@@ -122,11 +122,6 @@ $(async function() {
             });
         });
 
-        // Render Table
-        var template = $('#tableTemplate').html();
-        var rendered = Mustache.render(template, {playlists: userPlaylists});
-        $('#tableContainer').append(rendered);
-
         // Enable Step 5
         $('#step5 button').prop('disabled', false);
     }
@@ -135,15 +130,16 @@ $(async function() {
     $('#step5 button').click(async function() {
         userPlaylists.forEach(playlist => {
             playlist.localtracks.forEach(localtrack => {
-                if (Math.abs(localtrack.matches[0].duration_difference) < 5000) {
+                if (Math.abs(localtrack.matches[0].duration_difference) < 3000) {
                     localtrack.matches[0].chosenOne = true;
                 }
-
-                localtrack.matches.forEach(match => {
-                    // ...
-                });
             });
         });
+
+        // Render Table
+        var template = $('#tableTemplate').html();
+        var rendered = Mustache.render(template, {playlists: userPlaylists});
+        $('#tableContainer').append(rendered);
     });
 });
 
