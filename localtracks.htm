@@ -84,15 +84,27 @@
     <script id="tableTemplate" type="text/template">
       {{#playlists}}
         <div class="row">
-          <div class="col-4 playlist">{{name}}</div>
+          <div class="col-4 playlist">
+            <p class="font-weight-bold">{{name}}</p>
+          </div>
           <div class="col-8">
             {{#localtracks}}
               <div class="row">
-                <div class="col-6 localtrack">{{track.name}}</div>
+                <div class="col-6 localtrack">
+                  <p class="font-weight-bold">{{track.name}}</p>
+                  <p class="font-weight-light">{{#track.artists}}{{name}}, {{/track.artists}}</p>
+                  <p class="font-weight-light">{{track.album.name}}</p>
+                  <p class="text-monospace">{{track.duration_ms}} ms</p>
+                </div>
                 <div class="col-6">
                   {{#matches}}
                     <div class="row">
-                      <div class="col-12 match">{{name}}</div>
+                      <div class="col-12 match">
+                        <p class="font-weight-bold">{{name}}</p>
+                        <p class="font-weight-light">{{#artists}}{{name}}, {{/artists}}</p>
+                        <p class="font-weight-light">{{album.name}}</p>
+                        <p class="text-monospace">{{duration_ms}} ms</p>
+                      </div>
                     </div>
                   {{/matches}}
                 </div>

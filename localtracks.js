@@ -78,10 +78,12 @@ $(async function() {
         $('#step3').removeClass('working');
         $('#step3').addClass('list-group-item-success');
 
-
+        // Remove Playlists that don't have local tracks
+        userPlaylists = userPlaylists.filter(playlist => playlist.localtracks.length != 0);
 
         // Step 4
         $('#step4').addClass('working');
+        var matchCount = 0;
         userPlaylists.forEach(playlist => {
             playlist.localtracks.forEach(localtrack => {
                 if (typeof localtrack['matches'] === 'undefined') {
@@ -91,6 +93,11 @@ $(async function() {
                     spotify.searchTracks(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, {limit: 5}),
                     (res) => {
                         localtrack['matches'] = localtrack['matches'].concat(res.tracks.items);
+
+                        if (res.tracks.items.length != 0) {
+                            matchCount++;
+                            $('#step4 small').text('found '+matchCount+' potential matches');
+                        }
                     }
                 ).catch(() => {
                     $('#step4').removeClass('working');
@@ -102,6 +109,11 @@ $(async function() {
         await queue.onEmpty();
         $('#step4').removeClass('working');
         $('#step4').addClass('list-group-item-success');
+
+        // Remove local tracks that don't have matches
+        userPlaylists.forEach(playlist => {
+            playlist.localtracks = playlist.localtracks.filter(localtrack => localtrack.matches.length != 0);
+        });
 
         // Development
         // downloadJson(userPlaylists, 'userPlaylists.json');
