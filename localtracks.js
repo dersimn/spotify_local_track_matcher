@@ -1,4 +1,6 @@
-var spotify = new SpotifyWebApi();
+const spotify = new SpotifyWebApi();
+const queue = new PQueue({concurrency: 1});
+
 var spotifyToken;
 var spotifyUserId;
 

@@ -3,6 +3,7 @@
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
     "jquery-deparam": "^0.5.3",
+    "p-queue": "^6.0.2",
     "spotify-web-api-js": "^1.2.0"
   }
 }
