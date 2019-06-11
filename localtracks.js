@@ -6,7 +6,7 @@ var spotifyUserId;
 
 var userPlaylists = [];
 
-$(function() {
+$(async function() {
     spotifyToken = $.deparam(window.location.hash.replace(/^#/, ''));
 
     // Step 1: enable/disable based on token in url's #
@@ -23,14 +23,9 @@ $(function() {
     } else {
         $('#step1').addClass('list-group-item-success');
         $('#step1 button').prop('disabled', true);
-
         $('#step2 button').prop('disabled', false);
-
-        spotify.setAccessToken(spotifyToken['access_token']);
-    }
     
-    // Step 2
-    $('#step2 button').click(async function() {
+        // Step 2
         spotify.setAccessToken(spotifyToken['access_token']);
 
         $('#step2 button').prop('disabled', true);
@@ -101,10 +96,10 @@ $(function() {
         // });
 
         // Step 5
-        // var template = $('#tableTemplate').html();
-        // var rendered = Mustache.render(template, {playlists: userPlaylists});
-        // $('#tableContainer').append(rendered);
-    });
+        var template = $('#tableTemplate').html();
+        var rendered = Mustache.render(template, {playlists: userPlaylists});
+        $('#tableContainer').append(rendered);
+    }
 });
 
 function spotifyProcessNext(initialPromise, processFunction) {
