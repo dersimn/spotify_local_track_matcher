@@ -34,12 +34,11 @@ $(function() {
         spotify.setAccessToken(spotifyToken['access_token']);
 
         $('#step2 button').prop('disabled', true);
-        
-        var profile = await spotify.getMe();
-        var spotifyUserId = profile.id;
-        console.log(spotifyUserId);
 
         try {
+            var profile = await spotify.getMe();
+            var spotifyUserId = profile.id;
+
             await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
                 res.items.forEach(playlist => {
                     if (playlist.owner.id == spotifyUserId || playlist.collaborative) {
