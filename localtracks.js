@@ -100,7 +100,7 @@ $(async function() {
             }
 
             await queue.add(() => spotifyProcessNext(
-                spotify.searchTracks(localTrackList[uri].title+' artist:'+localTrackList[uri].artist, {limit: 5}), (res) => {
+                spotify.searchTracks(localTrackList[uri].title+' artist:'+localTrackList[uri].artist+' album:'+localTrackList[uri].album, {limit: 5}), (res) => {
                     localTrackList[uri]['matches'] = localTrackList[uri]['matches'].concat(res.tracks.items);
 
                     if (res.tracks.items.length != 0) {
@@ -121,12 +121,18 @@ $(async function() {
         // Remove local tracks that don't have matches
         localTrackList = Object.filter(localTrackList, track => track.matches.length != 0);
 
-        // Calculate duration difference for each match
-        Object.values(localTrackList).forEach(track => {
+        // Render Table
+        var template = $('#tableTemplate').html();
+        var rendered = Mustache.render(template, {playlists: Object.entries(localTrackList).map(([uri, track]) => {
+            track.localUri = uri;
+
             track.matches.forEach(match => {
                 match.duration_diff = match.duration_ms - track.duration;
             });
-        });
+
+            return track;
+        })});
+        $('#tableContainer').append(rendered);
 
         // Enable Step 5
         $('#step5 button').prop('disabled', false);
@@ -141,11 +147,6 @@ $(async function() {
                 }
             });
         });
-
-        // Render Table
-        var template = $('#tableTemplate').html();
-        var rendered = Mustache.render(template, {playlists: userPlaylists});
-        $('#tableContainer').append(rendered);
     });
 });
 
@@ -173,7 +174,6 @@ function spotifyProcessNext(initialPromise, processFunction) {
     }); 
 }
 
-Object.filter = (obj, predicate) => 
-    Object.assign(...Object.keys(obj)
-                           .filter( key => predicate(obj[key]) )
-                           .map( key => ({ [key]: obj[key] }) ) );
+Object.filter = (obj, predicate) => Object.assign(...Object.keys(obj)
+                                                           .filter( key => predicate(obj[key]) )
+                                                           .map( key => ({ [key]: obj[key] }) ) );

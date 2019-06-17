@@ -107,38 +107,33 @@
     </footer>
 
     <script id="tableTemplate" type="text/template">
-      <div class="row headline">
-        <div class="col-4"><p class="font-weight-bold">Playlist Name</p></div>
-        <div class="col-4"><p class="font-weight-bold">Local Track</p></div>
-        <div class="col-4"><p class="font-weight-bold">Matches</p></div>
-      </div>
       {{#playlists}}
         <div class="row">
-          <div class="col-4 playlist">
-            <p class="font-weight-normal">{{name}}</p>
-          </div>
-          <div class="col-8">
-            {{#localtracks}}
-              <div class="row">
-                <div class="col-6 localtrack">
-                  <p class="font-weight-normal">{{track.name}}</p>
-                  <p class="font-weight-light">{{#track.artists}}{{name}}, {{/track.artists}}</p>
-                  <p class="font-weight-light">{{track.album.name}}</p>
+          <div class="col-6 playlist">
+            <div class="list-group">
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">{{title}}</h5>
+                  <small>{{playlists.length}}</small>
                 </div>
-                <div class="col-6">
-                  {{#matches}}
-                    <div class="row">
-                      <div class="col-12 match{{#chosenOne}} list-group-item-success{{/chosenOne}}">
-                        <p class="font-weight-normal">{{name}}</p>
-                        <p class="font-weight-light">{{#artists}}{{name}}, {{/artists}}</p>
-                        <p class="font-weight-light">{{album.name}}</p>
-                        <p class="text-monospace">{{duration_difference}} ms</p>
-                      </div>
-                    </div>
-                  {{/matches}}
-                </div>
+                <p class="mb-1">{{artist}}</p>
+                <p class="mb-1">{{album}}</p>
               </div>
-            {{/localtracks}}
+            </div>
+          </div>
+          <div class="col-6 matches">
+            <div class="list-group">
+              {{#matches}}
+                <div class="list-group-item" data-localUri="{{localUri}}">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{name}}</h5>
+                    <small>{{duration_diff}}</small>
+                  </div>
+                  <p class="mb-1">{{#artists}}{{name}}; {{/artists}}</p>
+                  <p class="mb-1">{{album.name}}</p>
+                </div>
+              {{/matches}}
+            </div>
           </div>
         </div>
       {{/playlists}}

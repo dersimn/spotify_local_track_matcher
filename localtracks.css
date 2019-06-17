@@ -36,26 +36,6 @@ code {
   font-size: 80%;
 }
 
-#tableContainer {
-  margin-top: 50px;
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 0.25rem;
-}
-#tableContainer p {
-  margin: 0;
-}
-
-#tableContainer .headline {
-  border-bottom: 2px solid #000;
-}
-
-.playlist, .localtrack, .match {
-  border-bottom: 1px solid #000;
-}
-.playlist, .localtrack {
-  border-right:   1px dashed #000;
-}
-
 /* Animation during processing */
 .working {
   background-color: #fff;
