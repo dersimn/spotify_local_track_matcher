@@ -52,16 +52,17 @@ $(async function() {
         // Step 3
         $('#step3').addClass('working');
         var localtrackCount = 0;
-        for (var playlist of userPlaylists) {
+        for (const playlist of userPlaylists) {
             await queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlist.id), (res) => {
                 res.items.forEach((trackItem, position) => {
                     if (trackItem.is_local) {
-                        var trackUri = trackItem.track.uri;
+                        var uri = trackItem.track.uri;
 
-                        localTrackList[trackUri] = Object.assign({}, localTrackList[trackUri], {
+                        localTrackList[uri] = Object.assign({}, localTrackList[uri], {
                             title: trackItem.track.name,
                             artist: trackItem.track.artists[0].name,
-                            album: trackItem.track.album.name
+                            album: trackItem.track.album.name,
+                            duration: trackItem.track.duration_ms
                         });
 
                         var playlistOccourence = {
@@ -69,10 +70,10 @@ $(async function() {
                             position: res.offset+position,
                             name: playlist.name
                         };
-                        if ('playlists' in localTrackList[trackUri]) {
-                            localTrackList[trackUri].playlists.push(playlistOccourence);
+                        if ('playlists' in localTrackList[uri]) {
+                            localTrackList[uri].playlists.push(playlistOccourence);
                         } else {
-                            localTrackList[trackUri].playlists = [playlistOccourence];
+                            localTrackList[uri].playlists = [playlistOccourence];
                         }
 
                         localtrackCount++;
@@ -93,41 +94,37 @@ $(async function() {
         // Step 4
         $('#step4').addClass('working');
         var matchCount = 0;
-        userPlaylists.forEach(playlist => {
-            playlist.localtracks.forEach(localtrack => {
-                if (typeof localtrack['matches'] === 'undefined') {
-                    localtrack['matches'] = [];
-                }
-                queue.add(() => spotifyProcessNext(
-                    spotify.searchTracks(localtrack.track.name+' artist:'+localtrack.track.artists[0].name, {limit: 5}),
-                    (res) => {
-                        localtrack['matches'] = localtrack['matches'].concat(res.tracks.items);
+        for (const uri of Object.keys(localTrackList)) {
+            if (typeof localTrackList[uri]['matches'] === 'undefined') {
+                localTrackList[uri]['matches'] = [];
+            }
 
-                        if (res.tracks.items.length != 0) {
-                            matchCount++;
-                            $('#step4 small').text('found '+matchCount+' potential matches');
-                        }
+            await queue.add(() => spotifyProcessNext(
+                spotify.searchTracks(localTrackList[uri].title+' artist:'+localTrackList[uri].artist, {limit: 5}), (res) => {
+                    localTrackList[uri]['matches'] = localTrackList[uri]['matches'].concat(res.tracks.items);
+
+                    if (res.tracks.items.length != 0) {
+                        matchCount++;
+                        $('#step4 small').text('found '+matchCount+' potential matches');
                     }
-                ).catch(() => {
-                    $('#step4').removeClass('working');
-                    $('#step4').addClass('list-group-item-danger');
-                    queue.pause();
-                }));
-            });
-        });
+                }
+            ).catch(() => {
+                $('#step4').removeClass('working');
+                $('#step4').addClass('list-group-item-danger');
+                queue.pause();
+            }));
+        }
         await queue.onEmpty();
         $('#step4').removeClass('working');
         $('#step4').addClass('list-group-item-success');
 
-        userPlaylists.forEach(playlist => {
-            // Remove local tracks that don't have matches
-            playlist.localtracks = playlist.localtracks.filter(localtrack => localtrack.matches.length != 0);
+        // Remove local tracks that don't have matches
+        localTrackList = Object.filter(localTrackList, track => track.matches.length != 0);
 
-            playlist.localtracks.forEach(localtrack => {
-                localtrack.matches.forEach(match => {
-                    match.chosenOne = false;
-                    match.duration_difference = match.duration_ms - localtrack.track.duration_ms;
-                });
+        // Calculate duration difference for each match
+        Object.values(localTrackList).forEach(track => {
+            track.matches.forEach(match => {
+                match.duration_diff = match.duration_ms - track.duration;
             });
         });
 
@@ -175,3 +172,8 @@ function spotifyProcessNext(initialPromise, processFunction) {
         _internalRecursive(initialPromise, processFunction, resolve, reject);
     }); 
 }
+
+Object.filter = (obj, predicate) => 
+    Object.assign(...Object.keys(obj)
+                           .filter( key => predicate(obj[key]) )
+                           .map( key => ({ [key]: obj[key] }) ) );
