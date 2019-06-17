@@ -51,11 +51,11 @@ $(async function() {
         // Step 3
         $('#step3').addClass('working');
         var localtrackCount = 0;
-        userPlaylists.forEach(playlist => {
+        for (var playlist of userPlaylists) {
             if (typeof playlist['localtracks'] === 'undefined') {
                 playlist['localtracks'] = [];
             }
-            queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlist.id), (res) => {
+            await queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlist.id), (res) => {
                 res.items.forEach((trackItem, position) => {
                     trackItem['position'] = res.offset+position;
 
@@ -73,7 +73,7 @@ $(async function() {
                 $('#step3').addClass('list-group-item-danger');
                 queue.pause();
             }));
-        });
+        }
 
         await queue.onEmpty();
         $('#step3').removeClass('working');
