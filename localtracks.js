@@ -33,6 +33,9 @@ $(async function() {
             await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
                 var ownPlaylists = res.items.filter(playlist => (playlist.owner.id == spotifyUserId || playlist.collaborative));
 
+                // Development
+                ownPlaylists = ownPlaylists.filter(playlist => playlist.name == 'test');
+
                 userPlaylists = userPlaylists.concat(ownPlaylists);
                 $('#step2 small').text('found '+userPlaylists.length+' playlists');
             });
