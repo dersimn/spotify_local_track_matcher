@@ -5,6 +5,7 @@ var urlHash = $.deparam(window.location.hash.replace(/^#/, ''));
 var spotifyUserId;
 
 var userPlaylists = [];
+var localTrackList = {};
 
 $(async function() {
     // Step 1: enable/disable based on token in url's #
@@ -52,17 +53,27 @@ $(async function() {
         $('#step3').addClass('working');
         var localtrackCount = 0;
         for (var playlist of userPlaylists) {
-            if (typeof playlist['localtracks'] === 'undefined') {
-                playlist['localtracks'] = [];
-            }
             await queue.add(() => spotifyProcessNext(spotify.getPlaylistTracks(playlist.id), (res) => {
                 res.items.forEach((trackItem, position) => {
-                    trackItem['position'] = res.offset+position;
-
-                    playlist['tracks'][res.offset+position] = trackItem;
-
                     if (trackItem.is_local) {
-                        playlist['localtracks'].push(trackItem);
+                        var trackUri = trackItem.track.uri;
+
+                        localTrackList[trackUri] = Object.assign({}, localTrackList[trackUri], {
+                            title: trackItem.track.name,
+                            artist: trackItem.track.artists[0].name,
+                            album: trackItem.track.album.name
+                        });
+
+                        var playlistOccourence = {
+                            id: playlist.id,
+                            position: res.offset+position,
+                            name: playlist.name
+                        };
+                        if ('playlists' in localTrackList[trackUri]) {
+                            localTrackList[trackUri].playlists.push(playlistOccourence);
+                        } else {
+                            localTrackList[trackUri].playlists = [playlistOccourence];
+                        }
 
                         localtrackCount++;
                         $('#step3 small').text('found '+localtrackCount+' local tracks');
@@ -78,9 +89,6 @@ $(async function() {
         await queue.onEmpty();
         $('#step3').removeClass('working');
         $('#step3').addClass('list-group-item-success');
-
-        // Remove Playlists that don't have local tracks
-        userPlaylists = userPlaylists.filter(playlist => playlist.localtracks.length != 0);
 
         // Step 4
         $('#step4').addClass('working');
