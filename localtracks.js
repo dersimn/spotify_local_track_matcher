@@ -1,16 +1,14 @@
 const spotify = new SpotifyWebApi();
 const queue = new PQueue({concurrency: 1});
 
-var spotifyToken;
+var urlHash = $.deparam(window.location.hash.replace(/^#/, ''));
 var spotifyUserId;
 
 var userPlaylists = [];
 
 $(async function() {
-    spotifyToken = $.deparam(window.location.hash.replace(/^#/, ''));
-
     // Step 1: enable/disable based on token in url's #
-    if (!('access_token' in spotifyToken)) {
+    if (!('access_token' in urlHash)) {
         console.log('no token provided');
         $('#step1 button').click(function() {
             window.location = 'https://accounts.spotify.com/authorize?'+$.param({
@@ -25,7 +23,7 @@ $(async function() {
         $('#step1 button').prop('disabled', true);
     
         // Step 2
-        spotify.setAccessToken(spotifyToken['access_token']);
+        spotify.setAccessToken(urlHash['access_token']);
 
         $('#step2').addClass('working');
         try {
