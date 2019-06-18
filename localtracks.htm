@@ -108,7 +108,7 @@
 
     <script id="tableTemplate" type="text/template">
       {{#playlists}}
-        <div class="row">
+        <div class="row" data-localUri="{{localUri}}">
           <div class="col-6 playlist">
             <div class="list-group">
               <div class="list-group-item">
@@ -124,7 +124,7 @@
           <div class="col-6 matches">
             <div class="list-group">
               {{#matches}}
-                <div class="list-group-item" data-localUri="{{localUri}}">
+                <div class="list-group-item" data-uri="{{uri}}">
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{name}}</h5>
                     <small>{{duration_diff}}</small>
