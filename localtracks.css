@@ -55,3 +55,10 @@ code {
     background-color: #fff;
   }
 }
+#tableContainer {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+#tableContainer .row {
+  margin-bottom: 15px;
+}

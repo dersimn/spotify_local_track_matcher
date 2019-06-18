@@ -113,7 +113,7 @@
             <div class="list-group">
               <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">{{title}}</h5>
+                  <h6 class="mb-1">{{title}}</h6>
                   <small>{{playlists.length}}</small>
                 </div>
                 <p class="mb-1">{{artist}}</p>
@@ -126,8 +126,8 @@
               {{#matches}}
                 <div class="list-group-item" data-uri="{{uri}}">
                   <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{name}}</h5>
-                    <small>{{duration_diff}}</small>
+                    <h6 class="mb-1">{{name}}</h6>
+                    <small>{{duration_diff}} ms</small>
                   </div>
                   <p class="mb-1">{{#artists}}{{name}}; {{/artists}}</p>
                   <p class="mb-1">{{album.name}}</p>

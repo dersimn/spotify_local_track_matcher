@@ -140,12 +140,17 @@ $(async function() {
 
     // Step 5
     $('#step5 button').click(async function() {
-        userPlaylists.forEach(playlist => {
-            playlist.localtracks.forEach(localtrack => {
-                if (Math.abs(localtrack.matches[0].duration_difference) < 3000) {
-                    localtrack.matches[0].chosenOne = true;
+        // Calculate duration difference for each match
+        Object.entries(localTrackList).map(([uri, track]) => {
+            for (var match of track.matches) {
+                if (Math.abs(match.duration_ms - track.duration) < 3000) {
+                    match.chosenOne = true;
+
+                    $('#tableContainer div.row[data-localUri="'+uri+'"] div.list-group-item[data-uri="'+match.uri+'"]').addClass('active');
+
+                    break;
                 }
-            });
+            }
         });
     });
 });
