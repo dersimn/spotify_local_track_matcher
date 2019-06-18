@@ -174,6 +174,22 @@ function spotifyProcessNext(initialPromise, processFunction) {
     }); 
 }
 
+async function spotifyReplaceLocalTrack(playlistId, trackPosition, replacementUri) {
+    // Get Snapshot ID for playlist
+    var ownPlaylists = [];
+    await spotifyProcessNext(spotify.getUserPlaylists({limit:50}), (res) => {
+        ownPlaylists = ownPlaylists.concat(res.items);
+    });
+    var snapshotId = ownPlaylists.filter(playlist => playlist.id == playlistId)[0].snapshot_id;
+
+    // Remove Track
+    await spotify.removeTracksFromPlaylistInPositions(playlistId, [trackPosition], snapshotId);
+
+    // Add Replacement
+    await spotify.addTracksToPlaylistAtPosition(playlistId, [replacementUri], trackPosition);
+}
+
+
 Object.filter = (obj, predicate) => Object.assign(...Object.keys(obj)
                                                            .filter( key => predicate(obj[key]) )
                                                            .map( key => ({ [key]: obj[key] }) ) );
