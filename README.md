@@ -1,12 +1,7 @@
 ## Run with Docker
 
-Install dependencies with `npm install` or
-
-    docker run --rm -v $(pwd):/app -w /app node npm install
-
-Run Browserify
-
-    browserify browserify_p-queue.js -o p-queue.js
+    npm install
+    grunt
 
 Run nginx
 
