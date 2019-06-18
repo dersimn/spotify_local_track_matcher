@@ -134,25 +134,49 @@ $(async function() {
         })});
         $('#tableContainer').append(rendered);
 
-        // Enable Step 5
+        // Enable Step 5 & 6
         $('#step5 button').prop('disabled', false);
+        $('#step6 button').prop('disabled', false);
+    }
+});
+
+// Step 5
+$('#step5 button').click(async function() {
+    $('#step5 button').prop('disabled', true);
+
+    Object.entries(localTrackList).map(([uri, track]) => {
+        for (var match of track.matches) {
+            if (Math.abs(match.duration_ms - track.duration) < 3000) {
+                match.chosenOne = true;
+
+                $('#tableContainer div.row[data-localUri="'+uri+'"] div.list-group-item[data-uri="'+match.uri+'"]').addClass('active');
+
+                break;
+            }
+        }
+    });
+
+    $('#step5').addClass('list-group-item-success');
+});
+
+// Step 6
+$('#step6 button').click(async function() {
+    $('#step5 button').prop('disabled', true);
+    $('#step6 button').prop('disabled', true);
+    $('#step6').addClass('working');
+
+    for (const uri of Object.keys(localTrackList)) {
+        localTrackList[uri].matches = localTrackList[uri].matches.filter(match => match.chosenOne);
+        if (localTrackList[uri].matches.length != 1) continue;
+
+        for (var playlist of localTrackList[uri].playlists) {
+            await queue.add(() => spotifyReplaceLocalTrack(playlist.id, playlist.position, localTrackList[uri].matches[0].uri));
+        }
     }
 
-    // Step 5
-    $('#step5 button').click(async function() {
-        // Calculate duration difference for each match
-        Object.entries(localTrackList).map(([uri, track]) => {
-            for (var match of track.matches) {
-                if (Math.abs(match.duration_ms - track.duration) < 3000) {
-                    match.chosenOne = true;
-
-                    $('#tableContainer div.row[data-localUri="'+uri+'"] div.list-group-item[data-uri="'+match.uri+'"]').addClass('active');
-
-                    break;
-                }
-            }
-        });
-    });
+    await queue.onEmpty();
+    $('#step6').removeClass('working');
+    $('#step6').addClass('list-group-item-success');
 });
 
 function spotifyProcessNext(initialPromise, processFunction) {
@@ -195,6 +219,6 @@ async function spotifyReplaceLocalTrack(playlistId, trackPosition, replacementUr
 }
 
 
-Object.filter = (obj, predicate) => Object.assign(...Object.keys(obj)
-                                                           .filter( key => predicate(obj[key]) )
-                                                           .map( key => ({ [key]: obj[key] }) ) );
+Object.filter = (obj, predicate) => Object.keys(obj)
+                                          .filter( key => predicate(obj[key]) )
+                                          .reduce( (res, key) => (res[key] = obj[key], res), {} );

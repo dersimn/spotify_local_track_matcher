@@ -116,8 +116,9 @@
                   <h6 class="mb-1">{{title}}</h6>
                   <small>{{playlists.length}}</small>
                 </div>
-                <p class="mb-1">{{artist}}</p>
-                <p class="mb-1">{{album}}</p>
+                <p class="mb-0">{{artist}}</p>
+                <p class="mb-0">{{album}}</p>
+                <p class="mb-0">{{#playlists}}{{name}}, {{/playlists}}</p>
               </div>
             </div>
           </div>
@@ -129,8 +130,8 @@
                     <h6 class="mb-1">{{name}}</h6>
                     <small>{{duration_diff}} ms</small>
                   </div>
-                  <p class="mb-1">{{#artists}}{{name}}; {{/artists}}</p>
-                  <p class="mb-1">{{album.name}}</p>
+                  <p class="mb-0">{{#artists}}{{name}}; {{/artists}}</p>
+                  <p class="mb-0">{{album.name}}</p>
                 </div>
               {{/matches}}
             </div>
