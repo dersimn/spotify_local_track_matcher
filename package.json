@@ -4,7 +4,7 @@
     "jquery": "^3.4.1",
     "jquery-deparam": "^0.5.3",
     "mustache": "^3.0.1",
-    "spotify-web-api-js": "^1.2.0"
+    "spotify-web-api-js": "github:dersimn/spotify-web-api-js"
   },
   "devDependencies": {
     "grunt": "^1.0.4",
