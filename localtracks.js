@@ -124,6 +124,7 @@ $(async function() {
                 $('#step4').addClass('list-group-item-danger');
                 queue.pause();
             }));
+            await queue.add(() => delay(100));
         }
         await queue.onEmpty();
         $('#step4').removeClass('working');
