@@ -111,7 +111,7 @@ $(async function() {
             }
 
             await queue.add(() => spotifyProcessNext(
-                spotify.searchTracks(localTrackList[uri].title+' artist:'+localTrackList[uri].artist+' album:'+localTrackList[uri].album, {limit: 5}), (res) => {
+                spotify.searchTracks(localTrackList[uri].title+' artist:'+localTrackList[uri].artist, {limit: 5}), (res) => {
                     localTrackList[uri]['matches'] = localTrackList[uri]['matches'].concat(res.tracks.items);
 
                     if (res.tracks.items.length != 0) {
