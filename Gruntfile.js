@@ -6,11 +6,11 @@ module.exports = function(grunt) {
         browserify: {
             pqueue: {
                 src: ['browserify_p-queue.js'],
-                dest: 'p-queue.js'
+                dest: 'browserify_build_p-queue.js'
             },
             delay: {
                 src: ['browserify_delay.js'],
-                dest: 'delay.js'
+                dest: 'browserify_build_delay.js'
             }
         },
 
@@ -24,8 +24,8 @@ module.exports = function(grunt) {
                     'node_modules/jquery-deparam/jquery-deparam.js',
                     'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
                     'node_modules/spotify-web-api-js/src/spotify-web-api.js',
-                    'p-queue.js',
-                    'delay.js',
+                    'browserify_build_p-queue.js',
+                    'browserify_build_delay.js',
                     'node_modules/mustache/mustache.js'
                 ],
                 dest: 'bundle.js'
@@ -36,11 +36,20 @@ module.exports = function(grunt) {
                 ],
                 dest: 'bundle.css'
             }
+        },
+
+        clean: {
+            build: [
+                'node_modules/',
+                'browserify_build_*.js',
+                'package-lock.json'
+            ]
         }
     });
 
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.registerTask('default', ['browserify', 'concat']);
 
