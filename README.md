@@ -13,9 +13,12 @@ Run nginx
 
 ## Publish via GitHub Pages
 
-    git branch -D gh-pages
-    git branch gh-pages
-    git checkout gh-pages
-    git add bundle.*
-    git commit -m "Publish for GitHub Pages"
-    git push -f origin gh-pages
+    git branch -D gh-pages && \
+    git branch gh-pages && \
+    git checkout gh-pages && \
+    npm install && \
+    grunt && \
+    git add bundle.* && \
+    git commit -m "Publish for GitHub Pages" && \
+    git push -f origin gh-pages && \
+    git checkout master
