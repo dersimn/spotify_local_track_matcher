@@ -46,7 +46,7 @@ $(async function() {
                 var ownPlaylists = res.items.filter(playlist => (playlist.owner.id == spotifyUserId || playlist.collaborative));
 
                 // Development
-                ownPlaylists = ownPlaylists.filter(playlist => playlist.name == 'test');
+                //ownPlaylists = ownPlaylists.filter(playlist => playlist.name == 'test');
 
                 userPlaylists = userPlaylists.concat(ownPlaylists);
                 $('#step2 small').text('found '+userPlaylists.length+' playlists');
