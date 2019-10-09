@@ -14,7 +14,7 @@ module.exports = function(grunt) {
             options: {
                 separator: '\n\n//------------------------------------------\n'
             },
-            dist: {
+            js: {
                 src: [
                     'node_modules/jquery/dist/jquery.js',
                     'node_modules/jquery-deparam/jquery-deparam.js',
@@ -24,6 +24,12 @@ module.exports = function(grunt) {
                     'node_modules/mustache/mustache.js'
                 ],
                 dest: 'bundle.js'
+            },
+            css: {
+                src: [
+                    'node_modules/bootstrap/dist/css/bootstrap.css'
+                ],
+                dest: 'bundle.css'
             }
         }
     });
