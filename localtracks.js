@@ -2,6 +2,7 @@ const spotify = new SpotifyWebApi();
 const queue = new PQueue({concurrency: 1});
 
 var urlHash = $.deparam(window.location.hash.replace(/^#/, ''));
+var state;
 var spotifyUserId;
 
 var userPlaylists = [];
@@ -9,19 +10,29 @@ var localTrackList = {};
 
 $(async function() {
     // Step 1: enable/disable based on token in url's #
-    if (!('access_token' in urlHash)) {
-        console.log('no token provided');
+    if (!('state' in urlHash)) {
         $('#step1 button').click(function() {
+            var readOnly = $('#authorize_readonly').prop('checked');
+            console.log(readOnly);
+
             window.location = 'https://accounts.spotify.com/authorize?'+$.param({
                 client_id: '74af9cd024304ad28d4e4ea53b0fd5da',
                 response_type: 'token',
                 redirect_uri: window.location.origin + window.location.pathname,
-                scope: 'playlist-read-private playlist-read-collaborative'+((!$('#authorize_readonly').prop('checked')) ? ' playlist-modify-public playlist-modify-private' : '')
+                scope: 'playlist-read-private playlist-read-collaborative'+((!readOnly) ? ' playlist-modify-public playlist-modify-private' : ''),
+                state: btoa(JSON.stringify({
+                    debug: false,
+                    readOnly: readOnly
+                }))
             });
         });
     } else {
+        state = JSON.parse(atob(urlHash['state']));
+
         $('#step1').addClass('list-group-item-success');
         $('#step1 button').prop('disabled', true);
+        $('#authorize_readonly').prop('checked', state.readOnly);
+        $('#authorize_readonly').prop('disabled', true);
     
         // Step 2
         spotify.setAccessToken(urlHash['access_token']);
