@@ -4,9 +4,13 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         browserify: {
-            default: {
+            pqueue: {
                 src: ['browserify_p-queue.js'],
                 dest: 'p-queue.js'
+            },
+            delay: {
+                src: ['browserify_delay.js'],
+                dest: 'delay.js'
             }
         },
 
@@ -21,6 +25,7 @@ module.exports = function(grunt) {
                     'node_modules/bootstrap/dist/js/bootstrap.bundle.js',
                     'node_modules/spotify-web-api-js/src/spotify-web-api.js',
                     'p-queue.js',
+                    'delay.js',
                     'node_modules/mustache/mustache.js'
                 ],
                 dest: 'bundle.js'
