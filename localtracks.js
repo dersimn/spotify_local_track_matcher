@@ -164,10 +164,13 @@ $('#step5 button').click(async function() {
                 $('#tableContainer div.row[data-localUri="'+uri+'"] div.list-group-item[data-uri="'+match.uri+'"]').addClass('active');
 
                 break;
+            } else {
+                match.chosenOne = false;
             }
         }
     });
 
+    $('#step5 small').text('selected ' + Object.values(localTrackList).reduce((res, i) => res + i.matches.filter(match => match.chosenOne).length, 0) + ' matches');
     $('#step5').addClass('list-group-item-success');
 });
 
@@ -177,12 +180,17 @@ $('#step6 button').click(async function() {
     $('#step6 button').prop('disabled', true);
     $('#step6').addClass('working');
 
+    var matchCount = 0;
     for (const uri of Object.keys(localTrackList)) {
         localTrackList[uri].matches = localTrackList[uri].matches.filter(match => match.chosenOne);
         if (localTrackList[uri].matches.length != 1) continue;
 
         for (var playlist of localTrackList[uri].playlists) {
+            console.log('Processing', playlist.name, localTrackList[uri].artist, localTrackList[uri].title);
+            
             await queue.add(() => spotifyReplaceLocalTrack(playlist.id, playlist.position, localTrackList[uri].matches[0].uri));
+            $('#step6 small').text('saved ' + (matchCount++) + ' tracks');
+
             await queue.add(() => delay(100));
         }
     }
