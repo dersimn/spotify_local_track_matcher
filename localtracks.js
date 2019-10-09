@@ -183,6 +183,7 @@ $('#step6 button').click(async function() {
 
         for (var playlist of localTrackList[uri].playlists) {
             await queue.add(() => spotifyReplaceLocalTrack(playlist.id, playlist.position, localTrackList[uri].matches[0].uri));
+            await queue.add(() => delay(100));
         }
     }
 
@@ -222,12 +223,15 @@ async function spotifyReplaceLocalTrack(playlistId, trackPosition, replacementUr
         ownPlaylists = ownPlaylists.concat(res.items);
     });
     var snapshotId = ownPlaylists.filter(playlist => playlist.id == playlistId)[0].snapshot_id;
+    await delay(100);
 
     // Remove Track
     await spotify.removeTracksFromPlaylistInPositions(playlistId, [trackPosition], snapshotId);
+    await delay(100);
 
     // Add Replacement
     await spotify.addTracksToPlaylistAtPosition(playlistId, [replacementUri], trackPosition);
+    await delay(100);
 }
 
 
