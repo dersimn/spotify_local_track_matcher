@@ -178,6 +178,7 @@ $('#step5 button').click(async function() {
 $('#step6 button').click(async function() {
     $('#step5 button').prop('disabled', true);
     $('#step6 button').prop('disabled', true);
+    $('#tableContainer').empty();
     $('#step6').addClass('working');
 
     var matchCount = 0;
@@ -189,7 +190,7 @@ $('#step6 button').click(async function() {
             console.log('Processing', playlist.name, localTrackList[uri].artist, localTrackList[uri].title);
             
             await queue.add(() => spotifyReplaceLocalTrack(playlist.id, playlist.position, localTrackList[uri].matches[0].uri));
-            $('#step6 small').text('saved ' + (matchCount++) + ' tracks');
+            $('#step6 small').text('saved ' + (++matchCount) + ' tracks');
 
             await queue.add(() => delay(100));
         }
