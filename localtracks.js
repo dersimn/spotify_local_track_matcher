@@ -1,5 +1,16 @@
-const spotify = new SpotifyWebApi();
+const $ = require('jquery');
+require('jquery-deparam');
+require('popper.js');
+require('bootstrap');
+const delay = require('delay');
+const Mustache = require('mustache');
+
+const {default: PQueue} = require('p-queue');
 const queue = new PQueue({concurrency: 1});
+
+const SpotifyWebApi = require('spotify-web-api-js');
+const spotify = new SpotifyWebApi();
+
 
 var urlHash = $.deparam(window.location.hash.replace(/^#/, ''));
 var state;

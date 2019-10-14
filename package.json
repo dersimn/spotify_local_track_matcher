@@ -5,13 +5,14 @@
     "jquery": "^3.4.1",
     "jquery-deparam": "^0.5.3",
     "mustache": "^3.0.1",
-    "spotify-web-api-js": "github:dersimn/spotify-web-api-js"
+    "popper.js": "^1.15.0",
+    "spotify-web-api-js": "github:dersimn/spotify-web-api-js",
+    "p-queue": "^6.0.2"
   },
   "devDependencies": {
     "grunt": "^1.0.4",
     "grunt-browserify": "^5.3.0",
     "grunt-contrib-clean": "^2.0.0",
-    "grunt-contrib-concat": "^1.0.1",
-    "p-queue": "^6.0.2"
+    "grunt-contrib-concat": "^1.0.1"
   }
 }
